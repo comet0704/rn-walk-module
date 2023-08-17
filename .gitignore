@@ -86,3 +86,4 @@ fastlane/FastlaneRunner
 
 .env
 .env.*
+/package-lock.json
