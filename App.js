@@ -41,7 +41,7 @@ const App = () => {
 
   return (
     <>
-
+      <Text>aaa</Text>
     </>
   )
 }
