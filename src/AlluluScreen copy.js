@@ -1,16 +1,23 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import WebView from "react-native-webview";
+import AuthStore from "./src/stores/AuthStore";
+import configs from "./src/utils/configs";
+import backendApis from "./src/utils/backendApis";
 import {
+  Alert,
+  View,
   AppState,
   BackHandler,
-  NativeModules,
   Platform,
+  NativeModules,
+  Vibration,
   SafeAreaView,
-  View
 } from "react-native";
 import BackgroundService from "react-native-background-actions";
-import StepCounter from "./utils/StepCounter";
-import { Text } from "react-native";
+import StepCounter from "./src/utils/StepCounter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import UserStore from "./src/stores/UserStore";
+import VersionCheck from "react-native-version-check";
 
 // 백그라운드 서비스 옵션
 const manbogiBackgroundServiceOptions = {
@@ -29,17 +36,25 @@ const manbogiBackgroundServiceOptions = {
 };
 
 const AlluluScreen = ({ navigation }) => {
+  const webViewRef = useRef();
   const appState = useRef(AppState.currentState);
+  const throttleRef = useRef();
   const stepCount = useRef(0);
   const [streaming, setStreaming] = useState(false);
   const PedometerUtilModule = NativeModules.PedometerUtil; // Android PedometerUtil
   const ScheduleExactAlarm = NativeModules.ScheduleExactAlarm; // Android ScheduleExactAlarm Permission
   const [currentDate, setCurrentDate] = useState(null);
+  const [randomString, setRandomString] = useState(
+    Math.random().toString(36).substr(2, 8)
+  );
   // 현재 날짜 가져오는 함수
   const getCurrentDate = async () => {
     if (currentDate) {
       return currentDate;
     }
+    const date = await backendApis.getNowDate();
+    setCurrentDate(date);
+    return date;
   };
 
   const getStepLogJson = async () => {
@@ -75,6 +90,9 @@ const AlluluScreen = ({ navigation }) => {
     }
 
     const stepLogJson = JSON.stringify(stepLog); // JSON 형태로 변환
+    webViewRef?.current?.postMessage(
+      JSON.stringify({ type: "stepLog", stepLogJson })
+    );
     return stepLog;
   };
 
@@ -118,6 +136,9 @@ const AlluluScreen = ({ navigation }) => {
           const steps = data?.numberOfSteps ?? 0;
           stepCount.current = steps;
           setTimeout(() => {
+            webViewRef?.current?.postMessage(
+              JSON.stringify({ type: "steps", steps })
+            );
             if (BackgroundService.isRunning()) {
               BackgroundService.updateNotification({
                 taskDesc: `👟 ${steps} 걸음`,
@@ -140,6 +161,9 @@ const AlluluScreen = ({ navigation }) => {
           stepCount.current = steps;
 
           setTimeout(() => {
+            webViewRef?.current?.postMessage(
+              JSON.stringify({ type: "steps", steps })
+            );
             if (BackgroundService.isRunning()) {
               BackgroundService.updateNotification({
                 taskDesc: `👟 ${steps} 걸음`,
@@ -172,6 +196,9 @@ const AlluluScreen = ({ navigation }) => {
           taskDesc: `👟 ${steps} 걸음`,
         });
       }
+      webViewRef?.current?.postMessage(
+        JSON.stringify({ type: "steps", steps })
+      );
     };
 
     StepCounter.startPedometerUpdatesFromDate(
@@ -198,6 +225,7 @@ const AlluluScreen = ({ navigation }) => {
   }, [streaming]);
 
   const startAllulu = async () => {
+    UserStore.setIsBackgroundForNecessaryUtils(false);
     if (Platform.OS === "android") {
       await BackgroundService.stop();
       await BackgroundService.start(
@@ -214,10 +242,11 @@ const AlluluScreen = ({ navigation }) => {
   };
 
   async function handleAppStateChange() {
+    UserStore.setIsBackgroundForNecessaryUtils(false);
+
     const subscription = AppState.addEventListener("change", (nextAppState) => {
-      console.log("11111111111", Platform.Version)
       if (
-        (Platform.OS !== "android" || Platform.Version <= 33) &&
+        (Platform.OS !== "android" || Platform.Version <= 31) &&
         appState.current.match(/inactive|background/) &&
         nextAppState === "active"
       ) {
@@ -236,8 +265,23 @@ const AlluluScreen = ({ navigation }) => {
     };
   }, []);
 
+  const reloadWebview = () => {
+    webViewRef?.current?.reload();
+  };
+
+  const isThrottle = (key) => {
+    return !throttleRef.current?.[key];
+  };
+
+  const setThrottle = (key, delay) => {
+    throttleRef.current = { [key]: true };
+    setTimeout(() => {
+      throttleRef.current = { [key]: false };
+    }, delay);
+  };
 
   const backAction = () => {
+    webViewRef?.current?.postMessage(JSON.stringify({ type: "backPress" }));
     return true;
   };
 
@@ -256,11 +300,97 @@ const AlluluScreen = ({ navigation }) => {
     BackHandler.removeEventListener("hardwareBackPress", backAction);
   };
 
+  const onWebviewMessage = (event) => {
+    if (event?.nativeEvent?.data?.includes(`{"type":"ready"`)) {
+      webViewRef?.current?.postMessage(
+        JSON.stringify({
+          type: "initWeb",
+          data: {
+            userId: UserStore.userInfo?._id,
+            codePushVersion: configs.codePushVersion,
+            appVersion: VersionCheck.getCurrentVersion(),
+            token: AuthStore.token,
+          },
+        })
+      );
+    }
+    if (event?.nativeEvent?.data === "startAllulu") {
+      startAllulu();
+    }
+
+    if (event?.nativeEvent?.data === "goBack") {
+      Alert.alert("종료", "정말 올룰루를 종료하시겠습니까?", [
+        {
+          text: "확인",
+          onPress: () => navigation.navigate("추천"),
+        },
+        { text: "취소", onPress: () => null, style: "cancel" },
+      ]);
+      return true;
+    }
+    if (event?.nativeEvent?.data === "loadUserCoupon") {
+      UserStore.loadUserCoupons();
+      return true;
+    }
+  };
+
+  const handleWebviewRequest = async (event) => {
+    const url = event.url;
+    if (!isThrottle("totalThrottle")) {
+      return;
+    }
+    setThrottle("totalThrottle", 1000);
+
+    // const isRequestSteps =
+    //   url.includes('#requestSteps') && event?.loading === true
+
+    if (url.includes("#closeGame")) {
+      navigation.goBack();
+      return false;
+    }
+
+    if (url.includes("#purchase")) {
+      const purchaseData = decodeURIComponent(url.split("#purchase.")[1]);
+      const commonPurchaseReward = JSON.parse(purchaseData);
+      navigation.navigate("AlluluPurchaseScreen", { commonPurchaseReward });
+    }
+
+    if (url.includes("#vibrate")) {
+      Vibration.vibrate(100);
+      return false;
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
-        <Text>AlluScreen</Text>
+        <WebView
+          style={{ flex: 1 }}
+          ref={webViewRef}
+          bounces={false}
+          source={{
+            uri: `${configs.alluluUrl}/?token=${AuthStore.token}#requestSteps&randomNumber=${randomString}`,
+          }}
+          javaScriptEnabled
+          onMessage={onWebviewMessage}
+          mixedContentMode="always"
+          overScrollMode="never"
+          userAgent="allulu"
+          onShouldStartLoadWithRequest={
+            Platform.OS === "ios" ? handleWebviewRequest : () => true
+          }
+          onNavigationStateChange={
+            Platform.OS === "android" ? handleWebviewRequest : () => true
+          }
+          onContentProcessDidTerminate={reloadWebview}
+          textZoom={100}
+          allowsInlineMediaPlayback={false}
+          automaticallyAdjustContentInsets={false} // 추가
+          contentInset={{ top: 0, right: 0, bottom: 0, left: 0 }} // 추가
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        />
       </View>
     </SafeAreaView>
   );

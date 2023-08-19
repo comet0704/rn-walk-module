@@ -5,12 +5,15 @@
  * @format
  * @flow strict-local
  */
+import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import * as Sentry from '@sentry/react-native'
 import moment from 'moment'
 import React, { useEffect } from 'react'
+import { Platform } from 'react-native'
 import { Text } from 'react-native'
 import codePush from 'react-native-code-push'
+import AlluluScreen from './src/AlluluScreen'
 /* global __DEV__ */
 
 const isHermes = () => !!global.HermesInternal
@@ -41,7 +44,17 @@ const App = () => {
 
   return (
     <>
-      <Text>aaa</Text>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Start"
+          screenOptions={{
+            headerShown: false,
+            animation: Platform.OS === "ios" ? "slide_from_bottom" : "slide_from_right",
+            headerTitleStyle: { fontSize: 16 },
+          }}>
+          <Stack.Screen name="Start" component={AlluluScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </>
   )
 }
