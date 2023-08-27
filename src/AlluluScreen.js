@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import BackgroundService from "react-native-background-actions";
 import StepCounter from "./utils/StepCounter";
-import { Text } from "react-native";
+import { Text, NativeEventEmitter } from "react-native";
 
 // 백그라운드 서비스 옵션
 const manbogiBackgroundServiceOptions = {
@@ -78,30 +78,45 @@ const AlluluScreen = ({ navigation }) => {
     return stepLog;
   };
 
-  // AlarmManager를 2번 호출하는 함수, 여러번 호출되면 기기 성능에 영향을 미칠 수 있으므로 1일 1회만 호출되도록 함
-  const startAlarmManager = async () => {
-    const lastAlarmManagerCallKey = "@lastAlarmManagerCall"; // AlarmManager를 마지막으로 호출한 날짜를 저장하는 AsyncStorage 키
-    const currentDate = new Date();
-    const lastAlarmManagerCall = await AsyncStorage.getItem(
-      lastAlarmManagerCallKey
-    );
+  
+  //앱이 처음설치된 후 로그인 한다음 유저의 현재걸음수 바로 표시되게 
+  const setStepFirstAppInstall = async () => {
+    const currentStep = 300;
+    PedometerUtilModule.setCurrentStep(currentStep);
+  }
 
-    if (lastAlarmManagerCall) {
-      const lastAlarmManagerCallDate = new Date(lastAlarmManagerCall);
-      if (
-        currentDate.getFullYear() === lastAlarmManagerCallDate.getFullYear() &&
-        currentDate.getMonth() === lastAlarmManagerCallDate.getMonth() &&
-        currentDate.getDate() === lastAlarmManagerCallDate.getDate()
-      ) {
-        return;
-      }
+  // 오늘 걸음수 얻기
+  const getTodayStep = async () => {
+    const startDate = new Date();
+
+    if (Platform.OS === "ios") {
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date();
+      StepCounter.queryPedometerDataBetweenDates(
+        startDate.getTime(), // react native can't pass Date object, so you should pass timestamp.
+        endDate.getTime(),
+        async (error, data) => {
+          const steps = data?.numberOfSteps ?? 0;
+          stepCount.current = steps;
+          setTimeout(() => {
+            if (BackgroundService.isRunning()) {
+              BackgroundService.updateNotification({
+                taskDesc: `👟 ${steps} 걸음`,
+              });
+            }
+          }, 500);
+        }
+      );
     }
-
-    console.log("Calling AlarmManager...");
-    await PedometerUtilModule.cancelAlarm(); // 이전에 등록한 알람을 취소합니다.
-    await PedometerUtilModule.startAlarmManager(); // 1번째 알람을 등록합니다.
-    await PedometerUtilModule.startAlarmManager(); // 2번째 알람을 등록합니다.
-    await AsyncStorage.setItem(lastAlarmManagerCallKey, currentDate.toString());
+    if (Platform.OS === "android") {
+      
+      StepCounter.todayCurrentStep(
+        async (error, data) => {
+          const steps = data?.numberOfSteps ?? "";
+          console.log("----current step----", steps);
+        }
+      );
+    }
   };
 
   // 처음 로딩되었을 때 걸음수를 가져오는 함수
@@ -157,6 +172,7 @@ const AlluluScreen = ({ navigation }) => {
 
     if (Platform.OS === "android") {
       startDate.setHours(23, 59, 59, 59);
+      return;
     }
     if (Platform.OS === "ios") {
       startDate.setHours(0, 0, 0, 0);
@@ -199,23 +215,19 @@ const AlluluScreen = ({ navigation }) => {
 
   const startAllulu = async () => {
     if (Platform.OS === "android") {
-      await BackgroundService.stop();
-      await BackgroundService.start(
-        backgroundInit,
-        manbogiBackgroundServiceOptions
-      );
-      await startAlarmManager();
+     
+     
     } else if (Platform.OS === "ios") {
       await StepCounter.requestPermission();
     }
     await setStreaming(true);
     await gettingStepCount();
     await getStepLogJson();
+
   };
 
   async function handleAppStateChange() {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
-      console.log("11111111111", Platform.Version)
       if (
         (Platform.OS !== "android" || Platform.Version <= 33) &&
         appState.current.match(/inactive|background/) &&
@@ -256,6 +268,23 @@ const AlluluScreen = ({ navigation }) => {
     BackHandler.removeEventListener("hardwareBackPress", backAction);
   };
 
+  useEffect(() => {
+    setTimeout(() => {
+      PedometerUtilModule.startNativeService();
+    }, 500);
+
+    
+    const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
+    let eventListener = eventEmitter.addListener('calledFromNative', event => {
+      console.log(event.msg) // "someValue"
+
+    });
+
+    // Removes the listener once unmounted
+    return () => {
+      eventListener.remove();
+    };
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
