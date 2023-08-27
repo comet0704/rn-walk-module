@@ -125,13 +125,13 @@ public class NotificationStepService extends Service implements SensorEventListe
 
             sensorManager.registerListener(this, countSensor, SensorManager.SENSOR_DELAY_UI);
             // 걸음 센서 있음
-            Preferences.setSensorYN(mContext, true);
+            Preferences.setSensorYN(gContext, true);
         } else if (accelerometer != null) {
 
             // TODO : 가속도 센서를 이용하여 걸음을 작동시킨다 : 20년 2월 13일
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             // 걸음 센서 없음
-            Preferences.setSensorYN(mContext, false);
+            Preferences.setSensorYN(gContext, false);
         }
 
 
