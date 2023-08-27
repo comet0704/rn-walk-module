@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/activity_app_widget"
+    android:minWidth="220dp"
+    android:minHeight="72dp" />
+
+ <!--
+ 여기서는 위젯의 크기라던가 레이아웃XML파일의 위치를 정의할 수 있습니다. 레이아웃의 크기는 하나의 셀에 74픽셀을 사용하게 됩니다.
+  하지만 [여기 https://developer.android.com/guide/topics/appwidgets/index.html]를 참고해 보면
+  위젯의 사이즈는 총 크기에서 2픽셀을 빼라고((number of cells * 74) – 2) 되어있군요.
+
+ -->

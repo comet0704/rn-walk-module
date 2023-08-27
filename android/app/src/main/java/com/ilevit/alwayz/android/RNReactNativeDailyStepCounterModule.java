@@ -20,6 +20,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorEvent;
 
 import static android.content.Context.SENSOR_SERVICE;
+import static com.ilevit.alwayz.android.util.Global.gContext;
+
 public class RNReactNativeDailyStepCounterModule extends ReactContextBaseJavaModule {
     private PedometerImpl pedometer;
     private ReactApplicationContext reactContext;
@@ -28,6 +30,7 @@ public class RNReactNativeDailyStepCounterModule extends ReactContextBaseJavaMod
         super(context);
         this.reactContext = context;
         this.pedometer = new PedometerImpl(context);
+        gContext = context;
     }
 
 
@@ -60,5 +63,10 @@ public class RNReactNativeDailyStepCounterModule extends ReactContextBaseJavaMod
         Sensor stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
 
         promise.resolve(stepCounterSensor != null);
+    }
+
+    @ReactMethod
+    public void todayCurrentStep(Callback callback) {
+        this.pedometer.todayCurrentStep(callback);
     }
 }

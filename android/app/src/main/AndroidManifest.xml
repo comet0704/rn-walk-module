@@ -17,6 +17,10 @@
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" /> 
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 
+    <!-- 부팅이 완료되면 서비스를 시작하기 위하여 부팅이 완료되었다는 것을 수신할 권한(permission)을 등록한다 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- Oreo API 28 부터는 FOREGROUND_SERVICE권한을 등록해야 포그라운드(Foreground) 서비스를 실행할 수 있다.-->
+
+
     <uses-feature
         android:name="android.hardware.sensor.stepcounter"
         android:required="false" />
@@ -37,14 +41,45 @@
       <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" />
 
 
-      <receiver
-          android:name=".AlarmReceiver"
-          android:enabled="true"
-          android:exported="false" >
-          <intent-filter>
-              <action android:name="android.intent.action.BOOT_COMPLETED" />
-          </intent-filter>
-      </receiver>
+        <receiver android:name=".receiver.AlarmReceiver" />
+
+        <receiver
+            android:name=".receiver.RebootRecever"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.DeviceDateEventReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.DATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".widget.AppWidget"
+            android:label="올웨이즈 걸음수"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ilevit.alwayz.android.android.appwidget.Click" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/app_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".service.NotificationStepService"
+            android:enabled="true"
+            android:exported="true"
+            android:stopWithTask="false" />
     
 
       <meta-data android:name="com.onesignal.NotificationAccentColor.DEFAULT" android:value="FFEA3F49" />

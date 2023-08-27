@@ -417,6 +417,18 @@ dependencies {
     // required if your app is in the Google Play Store (tip: avoid using bundled play services libs)
     implementation 'com.google.android.gms:play-services-ads-identifier:16.0.0'
     implementation 'io.sentry:sentry-android:6.17.0'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+
+    // 레트로핏2 라이브러리 의존성 추가
+    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.4.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
+    implementation 'com.squareup.okhttp3:okhttp-urlconnection:4.3.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
 }
 
 

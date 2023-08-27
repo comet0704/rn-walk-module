@@ -1,5 +1,7 @@
 package com.ilevit.alwayz.android;
 
+import static com.ilevit.alwayz.android.util.Global.gContext;
+
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +19,7 @@ public class ScheduleExactAlarmModule extends ReactContextBaseJavaModule {
     public ScheduleExactAlarmModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
+        gContext = reactContext;
     }
 
     @Override

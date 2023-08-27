@@ -2,6 +2,8 @@ package com.ilevit.alwayz.android;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import static com.ilevit.alwayz.android.util.Global.gContext;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,6 +23,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.ilevit.alwayz.android.util.Preferences;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,6 +57,8 @@ public class PedometerImpl implements SensorEventListener { // 센서 이벤트 
     private int initialStepCount = -1;
 
     public PedometerImpl(ReactApplicationContext reactContext) {
+
+        gContext = reactContext;
         sensorManager = (SensorManager) reactContext.getSystemService(reactContext.SENSOR_SERVICE);
         stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         this.reactContext = reactContext;
@@ -65,6 +70,7 @@ public class PedometerImpl implements SensorEventListener { // 센서 이벤트 
     }
 
     public void start() {
+
         if ((stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)) != null) {
             sensorManager.unregisterListener(this); // 앱 껐다 켰을때를 고려해서...?
             this.listeningFromValue = 0;
@@ -75,6 +81,7 @@ public class PedometerImpl implements SensorEventListener { // 센서 이벤트 
     }
 
     public void start(long date) { // 실시간 걸음수 감지를 시작하라고 명령하는 메소드
+
         if ((stepCounter = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)) != null) {
             sensorManager.unregisterListener(this); // 앱 껐다 켰을때를 고려해서...?
             Calendar cal = Calendar.getInstance(Locale.KOREA);
@@ -162,6 +169,13 @@ public class PedometerImpl implements SensorEventListener { // 센서 이벤트 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    public void todayCurrentStep(Callback callback) {
+        String totalStep = Preferences.getStepCount(reactContext); // 현재 걸음수
+        WritableMap result = Arguments.createMap();
+        result.putString("numberOfSteps", totalStep);
+        callback.invoke(null, result);
     }
 
     public void queryPedometerDataFromDate(Long from, Long end, Callback callback) {
