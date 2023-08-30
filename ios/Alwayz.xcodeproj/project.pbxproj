@@ -19,6 +19,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		3D701A1DDE85666519A190A4 /* libPods-Alwayz-AlwayzTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF984F764CC45B22AF75130B /* libPods-Alwayz-AlwayzTests.a */; };
 		6F83C5B7715CA1EF52A30795 /* libPods-OneSignalNotificationServiceExtension.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F3332DD2F0BD37F6E307EA /* libPods-OneSignalNotificationServiceExtension.a */; };
+		8058EA8B2A9B76B300CCC0FE /* HealthKitModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8058EA8A2A9B76B300CCC0FE /* HealthKitModule.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		EA1EE46E2A03E51D00A05556 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD449862A03CA4800D590A3 /* CoreMotion.framework */; };
 		EABD9FDE2A053B9300987290 /* RNReactNativeDailyStepCounter.m in Sources */ = {isa = PBXBuildFile; fileRef = EABD9FDC2A053B9300987290 /* RNReactNativeDailyStepCounter.m */; };
@@ -80,6 +81,7 @@
 		1E35E5026FCC76E1D6DC9B69 /* Pods-Alwayz.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Alwayz.staging.xcconfig"; path = "Target Support Files/Pods-Alwayz/Pods-Alwayz.staging.xcconfig"; sourceTree = "<group>"; };
 		21F3332DD2F0BD37F6E307EA /* libPods-OneSignalNotificationServiceExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OneSignalNotificationServiceExtension.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5304625B373F8B154D93BA7C /* Pods-OneSignalNotificationServiceExtension.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.staging.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.staging.xcconfig"; sourceTree = "<group>"; };
+		8058EA8A2A9B76B300CCC0FE /* HealthKitModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HealthKitModule.swift; path = Alwayz/HealthKitModule.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Alwayz/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8C160787296BDAFAA3FF6245 /* libPods-Alwayz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Alwayz.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90D0482E24C46A65123F8BE6 /* Pods-Alwayz-AlwayzTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Alwayz-AlwayzTests.release.xcconfig"; path = "Target Support Files/Pods-Alwayz-AlwayzTests/Pods-Alwayz-AlwayzTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				0C9B2E49275BB6C600755AC5 /* Frame 256.png */,
 				0C81F50126A1687800BBB495 /* GoogleService-Info.plist */,
+				8058EA8A2A9B76B300CCC0FE /* HealthKitModule.swift */,
 			);
 			name = Alwayz;
 			sourceTree = "<group>";
@@ -604,6 +607,7 @@
 			files = (
 				EABD9FDE2A053B9300987290 /* RNReactNativeDailyStepCounter.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				8058EA8B2A9B76B300CCC0FE /* HealthKitModule.swift in Sources */,
 				0CE4F0C2267880B9004AA3DD /* File.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
@@ -822,6 +826,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Alwayz/Alwayz.entitlements;
 				CURRENT_PROJECT_VERSION = 1442;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = JDZPRADW7S;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -951,7 +956,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ilevit.alwayz.ios;
 				PRODUCT_NAME = Alwayz;
 				SWIFT_OBJC_BRIDGING_HEADER = "Alwayz-Bridging-Header.h";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1027,6 +1032,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Alwayz/Alwayz.entitlements;
 				CURRENT_PROJECT_VERSION = 1442;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = JDZPRADW7S;
 				ENABLE_BITCODE = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
@@ -1159,7 +1165,7 @@
 				PRODUCT_NAME = Alwayz;
 				SWIFT_OBJC_BRIDGING_HEADER = "Alwayz-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1173,6 +1179,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Alwayz/Alwayz.entitlements;
 				CURRENT_PROJECT_VERSION = 1442;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = JDZPRADW7S;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1302,7 +1309,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ilevit.alwayz.ios;
 				PRODUCT_NAME = Alwayz;
 				SWIFT_OBJC_BRIDGING_HEADER = "Alwayz-Bridging-Header.h";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

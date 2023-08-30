@@ -14,9 +14,13 @@
 		<string>applinks:alwayzshop.app.link</string>
 		<string>applinks:alwayzshop-alternate.app.link</string>
 	</array>
-	<key>com.apple.security.application-groups</key>
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<key>com.apple.developer.healthkit.access</key>
 	<array>
-		<string>group.com.ilevit.alwayz.ios.onesignal</string>
+		<string>health-records</string>
 	</array>
+	<key>com.apple.security.application-groups</key>
+	<array/>
 </dict>
 </plist>

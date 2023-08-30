@@ -9,6 +9,7 @@
 #import <CoreMotion/CoreMotion.h>
 #import <React/RCTBridge.h>
 #import <React/RCTEventDispatcher.h>
+#import "Alwayz-Swift.h"
 
 @implementation RNReactNativeDailyStepCounter
 
@@ -17,9 +18,12 @@ RCT_EXPORT_MODULE(RNReactNativeDailyStepCounter);
 
 
 - (NSArray<NSString *> *)supportedEvents{
-    return @[@"stepCountChanged"];
+  return @[@"stepCountChanged"];
 }
 
+- (void)getHealthKitPermission {
+
+}
 
 RCT_EXPORT_METHOD(isStepCountingAvailable:(RCTResponseSenderBlock) callback) {
     callback(@[[NSNull null], @([CMPedometer isStepCountingAvailable])]);
@@ -34,18 +38,31 @@ RCT_EXPORT_METHOD(isPedometerEventTrackingAvailable:(RCTResponseSenderBlock) cal
 }
 
 RCT_EXPORT_METHOD(queryPedometerDataBetweenDates:(NSDate *)startDate endDate:(NSDate *)endDate handler:(RCTResponseSenderBlock)handler) {
-    [self.pedometer queryPedometerDataFromDate:startDate
-                                        toDate:endDate
-                                   withHandler:^(CMPedometerData *pedometerData, NSError *error) {
-                                       if (error) {
-                                           handler(@[error.localizedDescription, [NSNull null]]);
-                                       } else if (pedometerData) {
-                                           NSDictionary *dict = [self dictionaryFromPedometerData:pedometerData];
-                                           handler(@[[NSNull null], dict]);
-                                       } else {
-                                           handler(@[@"No data found", [NSNull null]]);
-                                       }
-                                   }];
+ 
+  //startDate, endDate Sample
+  NSDate *currDate = [NSDate date];
+  NSDate *sevenDays = [[NSDate date] dateByAddingTimeInterval:-60*60*24*7];
+  
+  [[HealthKitModule healthKitSahred] getStepsCountWithStart:sevenDays end:currDate completion:^(double count) {
+    NSLog(@"Total Step is %f", count);
+    NSDictionary *dict = [self dictionaryFromHealthKitDate:sevenDays end_date:currDate step_count:count];
+    handler(@[[NSNull null], dict]);
+  }];
+  
+
+  
+//    [self.pedometer queryPedometerDataFromDate:sevenDays
+//                                        toDate:currDate
+//                                   withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+//                                       if (error) {
+//                                           handler(@[error.localizedDescription, [NSNull null]]);
+//                                       } else if (pedometerData) {
+//                                           NSDictionary *dict = [self dictionaryFromPedometerData:pedometerData];
+//                                           handler(@[[NSNull null], dict]);
+//                                       } else {
+//                                           handler(@[@"No data found", [NSNull null]]);
+//                                       }
+//                                   }];
 }
 
 
@@ -115,6 +132,23 @@ RCT_EXPORT_METHOD(authorizationStatus:(RCTResponseSenderBlock) callback) {
     return newDate;
 }
 
+
+- (NSDictionary *)dictionaryFromHealthKitDate:(NSDate *)start_date
+                                    end_date : (NSDate *)end_date
+                                   step_count: (double)step_count {
+  static NSDateFormatter *formatter;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    formatter = [[NSDateFormatter alloc] init];
+    formatter.dateFormat = @"yyyy-MM-dd";
+    formatter.locale = [NSLocale localeWithLocaleIdentifier:@"ko_KR"];
+    formatter.timeZone = [NSTimeZone timeZoneWithName:@"Asia/Seoul"];
+  });
+  return @{@"date": end_date?:[NSNull null],
+           @"startDate": start_date?:[NSNull null],
+           @"endDate": end_date?:[NSNull null],
+           @"numberOfSteps":[NSNumber numberWithDouble: step_count]?:[NSNull null]};
+}
 
 - (NSDictionary *)dictionaryFromPedometerData:(CMPedometerData *)data {
     static NSDateFormatter *formatter;

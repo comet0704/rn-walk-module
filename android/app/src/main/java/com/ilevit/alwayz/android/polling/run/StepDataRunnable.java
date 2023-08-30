@@ -411,7 +411,7 @@ public class StepDataRunnable implements Runnable {
         Preferences.setSendStepCount(mContext, Integer.valueOf("0"));
 
         // 서버에 전송한다.
-        retrofitClient.create(StepService.class).setSteps_post(appToken, sdm).enqueue(setSteps_post);
+//        retrofitClient.create(StepService.class).setSteps_post(appToken, sdm).enqueue(setSteps_post);
 
 
         ////////////Global_UTIL.file_log( "*************************************************자정  걸음수 0 midnightExecute 걸음수 초기화 했다.");
@@ -442,7 +442,7 @@ public class StepDataRunnable implements Runnable {
         // 알람 설정 확인
         Intent intent = new Intent(mContext, DeviceDateEventReceiver.class);
         // PendingIntent.FLAG_NO_CREATE 플래그를 사용하여 PendingIntent.getActivity, PendingIntent.getBroadcast, PendingIntent.getService 등을 호출해 보면 된다. 이미 설정된 알람이 없다면 null 을 반환한다.
-        PendingIntent pIntent = PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent pIntent = PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE);
         // result == true 이면 설정되지 않았음
         boolean result = (pIntent == null);
 

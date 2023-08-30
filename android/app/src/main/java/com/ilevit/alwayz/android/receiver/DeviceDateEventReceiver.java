@@ -241,7 +241,7 @@ public class DeviceDateEventReceiver extends BroadcastReceiver {
         // 알람 설정 확인
         Intent intent = new Intent(context, DeviceDateEventReceiver.class);
         // PendingIntent.FLAG_NO_CREATE 플래그를 사용하여 PendingIntent.getActivity, PendingIntent.getBroadcast, PendingIntent.getService 등을 호출해 보면 된다. 이미 설정된 알람이 없다면 null 을 반환한다.
-        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE);
         // result == true 이면 설정되지 않았음
         boolean result = (pIntent == null);
 

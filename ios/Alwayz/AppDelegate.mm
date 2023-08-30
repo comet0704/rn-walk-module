@@ -26,7 +26,9 @@
 
 #import <react/config/ReactNativeConfig.h>
 
+
 static NSString *const kRNConcurrentRoot = @"concurrentRoot";
+HKHealthStore m_healthStore;
 
 @interface AppDelegate () <RCTCxxBridgeDelegate, RCTTurboModuleManagerDelegate> {
   RCTTurboModuleManager *_turboModuleManager;
@@ -38,6 +40,8 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 #endif
 
 @implementation AppDelegate
+
+
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -70,9 +74,16 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+  
+  [self getHealthKitPermission];
 
   // [RNSplashScreen show];
   return YES;
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+  NSLog(@"app will enter foreground");
+//  [self getHealthKitPermission];
 }
 
 /// This method controls whether the `concurrentRoot`feature of React18 is turned on or off.
@@ -214,5 +225,28 @@ continueUserActivity:(nonnull NSUserActivity *)userActivity
   return [RCTLinkingManager application:application openURL:url
                       sourceApplication:sourceApplication annotation:annotation];
 }
+  
+  - (void)getHealthKitPermission {
+    if ([HKHealthStore isHealthDataAvailable]) {
+      
+//      NSArray *readTypes = @[[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount]];
+      NSArray *readTypes = @[[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount]];
+      
+      
+      HKHealthStore *store = [[HKHealthStore alloc] init];
+      
+      [store requestAuthorizationToShareTypes:nil readTypes:[NSSet setWithArray:readTypes] completion:^(BOOL success, NSError *error) {
+        if (!success) {
+          NSLog(@"You didn't allow HealthKit to access these read/write data types. In your app[][1]. The error was: %@.", error);
+          
+          return;
+        } else {
+          NSLog(@"Permission allowed");
+        }
+      }];
+    }
+    
+  }
+  
 
 @end
