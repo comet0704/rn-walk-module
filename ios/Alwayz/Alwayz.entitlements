@@ -21,6 +21,8 @@
 		<string>health-records</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
-	<array/>
+	<array>
+		<string>group.com.ilevit.alwayz.ios.onesignal</string>
+	</array>
 </dict>
 </plist>
