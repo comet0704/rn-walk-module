@@ -29,7 +29,7 @@ import retrofit2.Retrofit;
 /**
  * 자정 되었을때 알려주는 알람
  *
- * @author 장현덕
+ * @author 장지운
  * @version 1.0.0
  * @since
  **/
